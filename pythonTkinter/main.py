@@ -5,6 +5,7 @@ import tkinter as tk
 class gridUnit:
     #a grid unit is 50 X 50 (500 / 10)
     content = None
+    canvasID = None
     gridX = None
     gridY = None
     center = None
@@ -17,6 +18,9 @@ class gridUnit:
 
     def setContent(self, content):  #Used to update grids with eaten pallets
         self.content = content
+
+    def setCanvasID(self, ID):
+        self.canvasID = ID;
 
 def meetsWallCondition(x, y):
     wallCondition = (
@@ -33,7 +37,7 @@ def meetsWallCondition(x, y):
         (x == 5 and y == 6)
     )
     return wallCondition
-def createMaze(gridSize, unitSize):
+def innitGrid(gridSize, unitSize):
     grid = numpy.ndarray(shape=(gridSize[0], gridSize[1]), dtype=gridUnit)
 
     #Creates the WALL's of the maze
@@ -52,27 +56,42 @@ def createMaze(gridSize, unitSize):
 
     return grid
 
-def innitWindow():
-    root = tk.Tk()
-    root.geometry('550x550')    # To bad this is hard coded
-
-    gridSize = (11, 11)
+def drawGrid(grid, canvas):
+    varB = 15
     unitSize = 50
-    grid = createMaze(gridSize, unitSize)
-
-    canvas = tk.Canvas(root, width=550, height=550, background='black')
 
     for gridX in range(len(grid)):
         for gridY in range(len(grid)):
             if grid[gridX][gridY].content == 'WALL':
-                canvas.create_rectangle(gridX * unitSize, gridY * unitSize, (gridX + 1) * unitSize, (gridY + 1) * unitSize, fill='blue')
+                id = canvas.create_rectangle(gridX * unitSize, gridY * unitSize, (gridX + 1) * unitSize, (gridY + 1) * unitSize, fill='blue')
             elif grid[gridX][gridY].content == 'PALLET':
-                canvas.create_oval((gridX * unitSize) + 10, (gridY * unitSize) + 10, ((gridX + 1) * unitSize) - 10, ((gridY + 1) * unitSize) - 10, fill='beige')
+                id = canvas.create_oval((gridX * unitSize) + varB, (gridY * unitSize) + varB, ((gridX + 1) * unitSize) - varB, ((gridY + 1) * unitSize) - varB, fill='beige')
+            grid[gridX][gridY].setCanvasID(id)
 
-    canvas.create_oval(250 + 10, 250 + 10, 300 - 10, 300 - 10, fill='red')  #Center
-    canvas.create_oval(0, 0, 50, 50, fill='red')
+def innitWindow():
+    root = tk.Tk()
+    root.geometry('550x550')    # To bad this is hard coded
 
-    canvas.pack()
+    varA = 10
+
+
+    gridSize = (11, 11)
+    unitSize = 50
+    grid = innitGrid(gridSize, unitSize)
+
+    # Creates a new canvas for the player
+    #player = movingCanvas(root)  # canvas.create_oval(50 + varA, 250 + varA, 100 - varA, 300 - varA, fill='red')
+    #player.pack(fill='both')
+
+    canvasBackground = tk.Canvas(root, width=550, height=550, background='white')
+    drawGrid(grid, canvasBackground)
+    temp = canvasBackground.create_oval(250 + varA, 250 + varA, 300 - varA, 300 - varA, fill='red')  #Center
+    canvasBackground.pack()
+
+    root.bind("<KeyPress-Left>", lambda _: canvasBackground.move(temp, -5, 0))
+    root.bind("<KeyPress-Right>", lambda _: canvasBackground.move(temp, 5, 0))
+    root.bind("<KeyPress-Up>", lambda _: canvasBackground.move(temp, 0, -5))
+    root.bind("<KeyPress-Down>", lambda _: canvasBackground.move(temp, 0, 5))
 
     root.mainloop()
 
