@@ -1,6 +1,7 @@
-import keyboard
+import ghost
 import numpy
 import tkinter as tk
+
 
 class gridUnit:
     #a grid unit is 50 X 50 (500 / 10)
@@ -21,6 +22,34 @@ class gridUnit:
 
     def setCanvasID(self, ID):
         self.canvasID = ID;
+
+
+class Player:
+    canvasID = None
+
+    def __init__(self, id):
+        self.canvasID = id
+
+    def intersectPallet(self, canvas, id):
+        pass
+
+
+def animetion(root, canvas, id, speed):
+    #speed = 5
+    #dy = 0
+
+    canvas.move(id, speed, 0)
+    xTL, yTL, xBR, yBR = canvas.coords(id)
+    #print(id, ': 1 = ', xTL, ' : ', yTL)
+    #print(id, ': 2 = ', xBR, ' : ', yBR)
+
+    if xBR >= 500 or xTL <= 50:
+        speed
+        speed = -speed  # Reverse the horizontal direction
+
+    # Schedule the next move
+    root.after(40, lambda: animetion(root, canvas, id, speed))
+
 
 def meetsWallCondition(x, y):
     wallCondition = (
@@ -46,6 +75,8 @@ def meetsEmptyCondition(x, y):
         (x == 1 and y == 5)
     )
     return emptyCondition
+
+
 def innitGrid(gridSize, unitSize):
     grid = numpy.ndarray(shape=(gridSize[0], gridSize[1]), dtype=gridUnit)
 
@@ -64,6 +95,7 @@ def innitGrid(gridSize, unitSize):
 
     return grid
 
+
 def drawGrid(grid, canvas):
     sizeModifier = 15
     unitSize = 50
@@ -78,6 +110,7 @@ def drawGrid(grid, canvas):
                 id = canvas.create_oval(unit.center[0] - unitSize / 2 + sizeModifier, unit.center[1] - unitSize / 2 + sizeModifier, unit.center[0] + unitSize / 2 - sizeModifier, unit.center[1] + unitSize / 2 - sizeModifier, fill='beige')
             unit.setCanvasID(id)
 
+
 def innitWindow():
     root = tk.Tk()
     screenWidth = 550
@@ -85,10 +118,11 @@ def innitWindow():
     screenDimensions = str(screenWidth) + 'x' + str(screenHeight)
     root.geometry(screenDimensions)
 
-    sizeModifier = 10
+    playerSizeModifier = 10
 
-    gridSize = (11, 11)
     unitSize = 50
+    gridSize = (int(screenWidth / unitSize), int(screenHeight / unitSize))
+
     grid = innitGrid(gridSize, unitSize)
 
     canvasBackground = tk.Canvas(root, width=550, height=550, background='white')
@@ -100,25 +134,37 @@ def innitWindow():
     spawn3 = grid[7][5].center
     offset = unitSize / 2
 
-    temp = canvasBackground.create_oval(spawn[0] - offset + sizeModifier, spawn[1] - offset + sizeModifier, spawn[0] + offset - sizeModifier, spawn[1] + offset - sizeModifier, fill='gold')
-    canvasBackground.create_oval(spawn1[0] - offset + sizeModifier, spawn1[1] - offset + sizeModifier, spawn1[0] + offset - sizeModifier, spawn1[1] + offset - sizeModifier, fill='red')
-    canvasBackground.create_oval(spawn2[0] - offset + sizeModifier, spawn2[1] - offset + sizeModifier, spawn2[0] + offset - sizeModifier, spawn2[1] + offset - sizeModifier, fill='red')
-    canvasBackground.create_oval(spawn3[0] - offset + sizeModifier, spawn3[1] - offset + sizeModifier, spawn3[0] + offset - sizeModifier, spawn3[1] + offset - sizeModifier, fill='red')
+    #temp = canvasBackground.create_oval(spawn[0] - offset + sizeModifier, spawn[1] - offset + sizeModifier, spawn[0] + offset - sizeModifier, spawn[1] + offset - sizeModifier, fill='gold')
+    player = Player(canvasBackground.create_oval(spawn[0] - offset + playerSizeModifier, spawn[1] - offset + playerSizeModifier,
+                                        spawn[0] + offset - playerSizeModifier, spawn[1] + offset - playerSizeModifier, fill='gold'))
+    #temp1 = canvasBackground.create_oval(spawn1[0] - offset + sizeModifier, spawn1[1] - offset + sizeModifier, spawn1[0] + offset - sizeModifier, spawn1[1] + offset - sizeModifier, fill='red')
+    ghost1 = ghost.Ghost(canvasBackground.create_oval(spawn1[0] - offset + 0, spawn1[1] - offset + 0,
+                                        spawn1[0] + offset - 0, spawn1[1] + offset - 0,
+                                        fill='red'), 1, spawn1[0], spawn1[1])
+    #temp2 = canvasBackground.create_oval(spawn2[0] - offset + sizeModifier, spawn2[1] - offset + sizeModifier, spawn2[0] + offset - sizeModifier, spawn2[1] + offset - sizeModifier, fill='red')
+    ghost2 = ghost.Ghost(canvasBackground.create_oval(spawn2[0] - offset + 0, spawn2[1] - offset + 0,
+                                         spawn2[0] + offset - 0, spawn2[1] + offset - 0,
+                                         fill='red'), 2, spawn2[0], spawn2[1])
+    #temp3 = canvasBackground.create_oval(spawn3[0] - offset + sizeModifier, spawn3[1] - offset + sizeModifier, spawn3[0] + offset - sizeModifier, spawn3[1] + offset - sizeModifier, fill='red')
+    temp3 = canvasBackground.create_oval(spawn3[0] - offset + 0, spawn3[1] - offset + 0,
+                                         spawn3[0] + offset - 0, spawn3[1] + offset - 0,
+                                         fill='red')
     canvasBackground.pack()
 
-    root.bind("<KeyPress-Left>", lambda _: canvasBackground.move(temp, -5, 0))
-    root.bind("<KeyPress-Right>", lambda _: canvasBackground.move(temp, 5, 0))
-    root.bind("<KeyPress-Up>", lambda _: canvasBackground.move(temp, 0, -5))
-    root.bind("<KeyPress-Down>", lambda _: canvasBackground.move(temp, 0, 5))
+    #animetion(root, canvasBackground, ghost1.canvasID, -5)
+    ghost1.animate(root, canvasBackground)
+    #animetion(root, canvasBackground, ghost2.canvasID, -5)
+    ghost2.animate(root, canvasBackground)
+
+    root.bind("<KeyPress-Left>", lambda _: canvasBackground.move(player.canvasID, -5, 0))
+    root.bind("<KeyPress-Right>", lambda _: canvasBackground.move(player.canvasID, 5, 0))
+    root.bind("<KeyPress-Up>", lambda _: canvasBackground.move(player.canvasID, 0, -5))
+    root.bind("<KeyPress-Down>", lambda _: canvasBackground.move(player.canvasID, 0, 5))
 
     root.mainloop()
 
 def main():
     innitWindow()
 
-    '''for gridY in range(10):
-        for gridX in range(10):
-            print(grid[gridX][gridY].content)'''
-
-
 main()
+
