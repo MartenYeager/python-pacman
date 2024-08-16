@@ -1,4 +1,5 @@
-import ghost
+import ghost as gh
+import player as pl
 import numpy
 import tkinter as tk
 
@@ -24,7 +25,7 @@ class gridUnit:
         self.canvasID = ID;
 
 
-class Player:
+'''class Player:
     canvasID = None
 
     def __init__(self, id):
@@ -32,24 +33,7 @@ class Player:
 
     def intersectPallet(self, canvas, id):
         pass
-
-
-def animetion(root, canvas, id, speed):
-    #speed = 5
-    #dy = 0
-
-    canvas.move(id, speed, 0)
-    xTL, yTL, xBR, yBR = canvas.coords(id)
-    #print(id, ': 1 = ', xTL, ' : ', yTL)
-    #print(id, ': 2 = ', xBR, ' : ', yBR)
-
-    if xBR >= 500 or xTL <= 50:
-        speed
-        speed = -speed  # Reverse the horizontal direction
-
-    # Schedule the next move
-    root.after(40, lambda: animetion(root, canvas, id, speed))
-
+'''
 
 def meetsWallCondition(x, y):
     wallCondition = (
@@ -88,6 +72,8 @@ def innitGrid(gridSize, unitSize):
                 content = 'WALL'
             elif meetsEmptyCondition(gridX, gridY):
                 content = 'EMPTY'
+            elif False:
+                content = 'SUPER'
             else:
                 content = 'PALLET'
 
@@ -135,16 +121,17 @@ def innitWindow():
     offset = unitSize / 2
 
     #temp = canvasBackground.create_oval(spawn[0] - offset + sizeModifier, spawn[1] - offset + sizeModifier, spawn[0] + offset - sizeModifier, spawn[1] + offset - sizeModifier, fill='gold')
-    player = Player(canvasBackground.create_oval(spawn[0] - offset + playerSizeModifier, spawn[1] - offset + playerSizeModifier,
-                                        spawn[0] + offset - playerSizeModifier, spawn[1] + offset - playerSizeModifier, fill='gold'))
+    playerID = canvasBackground.create_oval(spawn[0] - offset + playerSizeModifier, spawn[1] - offset + playerSizeModifier,
+                                        spawn[0] + offset - playerSizeModifier, spawn[1] + offset - playerSizeModifier, fill='gold')
+    player = pl.Player(playerID, spawn[0], spawn[1])
     #temp1 = canvasBackground.create_oval(spawn1[0] - offset + sizeModifier, spawn1[1] - offset + sizeModifier, spawn1[0] + offset - sizeModifier, spawn1[1] + offset - sizeModifier, fill='red')
-    ghost1 = ghost.Ghost(canvasBackground.create_oval(spawn1[0] - offset + 0, spawn1[1] - offset + 0,
+    ghost1 = gh.Ghost(canvasBackground.create_oval(spawn1[0] - offset + 0, spawn1[1] - offset + 0,
                                         spawn1[0] + offset - 0, spawn1[1] + offset - 0,
                                         fill='red'), 1, spawn1[0], spawn1[1])
     #temp2 = canvasBackground.create_oval(spawn2[0] - offset + sizeModifier, spawn2[1] - offset + sizeModifier, spawn2[0] + offset - sizeModifier, spawn2[1] + offset - sizeModifier, fill='red')
-    ghost2 = ghost.Ghost(canvasBackground.create_oval(spawn2[0] - offset + 0, spawn2[1] - offset + 0,
+    ghost2 = gh.Ghost(canvasBackground.create_oval(spawn2[0] - offset + 0, spawn2[1] - offset + 0,
                                          spawn2[0] + offset - 0, spawn2[1] + offset - 0,
-                                         fill='red'), 2, spawn2[0], spawn2[1])
+                                         fill='red'), 2, spawn1[0], spawn1[1])
     #temp3 = canvasBackground.create_oval(spawn3[0] - offset + sizeModifier, spawn3[1] - offset + sizeModifier, spawn3[0] + offset - sizeModifier, spawn3[1] + offset - sizeModifier, fill='red')
     temp3 = canvasBackground.create_oval(spawn3[0] - offset + 0, spawn3[1] - offset + 0,
                                          spawn3[0] + offset - 0, spawn3[1] + offset - 0,
@@ -153,13 +140,12 @@ def innitWindow():
 
     #animetion(root, canvasBackground, ghost1.canvasID, -5)
     ghost1.animate(root, canvasBackground)
+    ghost1.intersectPlayer(root, player)
     #animetion(root, canvasBackground, ghost2.canvasID, -5)
     ghost2.animate(root, canvasBackground)
+    ghost2.intersectPlayer(root, player)
 
-    root.bind("<KeyPress-Left>", lambda _: canvasBackground.move(player.canvasID, -5, 0))
-    root.bind("<KeyPress-Right>", lambda _: canvasBackground.move(player.canvasID, 5, 0))
-    root.bind("<KeyPress-Up>", lambda _: canvasBackground.move(player.canvasID, 0, -5))
-    root.bind("<KeyPress-Down>", lambda _: canvasBackground.move(player.canvasID, 0, 5))
+    player.animate(root, canvasBackground)
 
     root.mainloop()
 
