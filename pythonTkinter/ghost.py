@@ -42,6 +42,7 @@ def route3a():
 
 class Ghost:
     canvasID = None
+    canvas = None
     route = None
     killed = False
     #speedInnit = 5
@@ -52,7 +53,8 @@ class Ghost:
     y = 0
     radius = 25
 
-    def __init__(self, id, route, x, y):
+    def __init__(self, canvas, id, route, x, y):
+        self. canvas = canvas
         self.canvasID = id
         self.route = route
 
@@ -61,9 +63,9 @@ class Ghost:
 
         #self.intersectPlayer()
 
-    def animate(self, root, canvas):
-        canvas.move(self.canvasID, self.speedX, self.speedY)
-        xTL, yTL, xBR, yBR = canvas.coords(self.canvasID)
+    def animate(self, root):
+        self.canvas.move(self.canvasID, self.speedX, self.speedY)
+        xTL, yTL, xBR, yBR = self.canvas.coords(self.canvasID)
 
         # Route
         if self.route == 1:
@@ -79,11 +81,11 @@ class Ghost:
         self.x = (xTL + xBR) / 2
         self.y = (yTL + yBR) / 2
 
-        root.after(40, lambda: self.animate(root, canvas))
-
+        root.after(40, lambda: self.animate(root))
 
     def kill(self):
         pass
+
     def intersectPlayer(self, root, player):
         dx = abs(self.x - player.x)
         dy = abs(self.y - player.y)
@@ -91,6 +93,9 @@ class Ghost:
         d = math.sqrt(dx**2 + dy**2)
 
         if d <= (self.radius + player.radius):
-            player.kill()
+            if player.super:
+                self.kill()
+            else:
+                player.kill()
         else:
             root.after(40, lambda: self.intersectPlayer(root, player))

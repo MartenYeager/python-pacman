@@ -20,20 +20,11 @@ class gridUnit:
 
     def setContent(self, content):  #Used to update grids with eaten pallets
         self.content = content
+        #canvas
 
     def setCanvasID(self, ID):
         self.canvasID = ID;
 
-
-'''class Player:
-    canvasID = None
-
-    def __init__(self, id):
-        self.canvasID = id
-
-    def intersectPallet(self, canvas, id):
-        pass
-'''
 
 def meetsWallCondition(x, y):
     wallCondition = (
@@ -123,13 +114,13 @@ def innitWindow():
     #temp = canvasBackground.create_oval(spawn[0] - offset + sizeModifier, spawn[1] - offset + sizeModifier, spawn[0] + offset - sizeModifier, spawn[1] + offset - sizeModifier, fill='gold')
     playerID = canvasBackground.create_oval(spawn[0] - offset + playerSizeModifier, spawn[1] - offset + playerSizeModifier,
                                         spawn[0] + offset - playerSizeModifier, spawn[1] + offset - playerSizeModifier, fill='gold')
-    player = pl.Player(playerID, spawn[0], spawn[1])
+    player = pl.Player(canvasBackground, playerID, spawn[0], spawn[1])
     #temp1 = canvasBackground.create_oval(spawn1[0] - offset + sizeModifier, spawn1[1] - offset + sizeModifier, spawn1[0] + offset - sizeModifier, spawn1[1] + offset - sizeModifier, fill='red')
-    ghost1 = gh.Ghost(canvasBackground.create_oval(spawn1[0] - offset + 0, spawn1[1] - offset + 0,
+    ghost1 = gh.Ghost(canvasBackground, canvasBackground.create_oval(spawn1[0] - offset + 0, spawn1[1] - offset + 0,
                                         spawn1[0] + offset - 0, spawn1[1] + offset - 0,
                                         fill='red'), 1, spawn1[0], spawn1[1])
     #temp2 = canvasBackground.create_oval(spawn2[0] - offset + sizeModifier, spawn2[1] - offset + sizeModifier, spawn2[0] + offset - sizeModifier, spawn2[1] + offset - sizeModifier, fill='red')
-    ghost2 = gh.Ghost(canvasBackground.create_oval(spawn2[0] - offset + 0, spawn2[1] - offset + 0,
+    ghost2 = gh.Ghost(canvasBackground, canvasBackground.create_oval(spawn2[0] - offset + 0, spawn2[1] - offset + 0,
                                          spawn2[0] + offset - 0, spawn2[1] + offset - 0,
                                          fill='red'), 2, spawn1[0], spawn1[1])
     #temp3 = canvasBackground.create_oval(spawn3[0] - offset + sizeModifier, spawn3[1] - offset + sizeModifier, spawn3[0] + offset - sizeModifier, spawn3[1] + offset - sizeModifier, fill='red')
@@ -138,14 +129,15 @@ def innitWindow():
                                          fill='red')
     canvasBackground.pack()
 
-    #animetion(root, canvasBackground, ghost1.canvasID, -5)
-    ghost1.animate(root, canvasBackground)
+    #ghost1.animate(root, canvasBackground)
     ghost1.intersectPlayer(root, player)
-    #animetion(root, canvasBackground, ghost2.canvasID, -5)
-    ghost2.animate(root, canvasBackground)
+
+    #ghost2.animate(root, canvasBackground)
     ghost2.intersectPlayer(root, player)
 
-    player.animate(root, canvasBackground)
+    player.animate(root)
+    player.tick(root)
+    player.intersect(root, grid, unitSize)
 
     root.mainloop()
 

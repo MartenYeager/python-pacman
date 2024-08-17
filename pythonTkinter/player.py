@@ -1,30 +1,121 @@
+import math
+
+
 class Player:
     canvasID = None
+    canvas = None
     palletsCollected = 0
     points = 0
     super = False
+
+    speedX = 0
+    speedY = 0
 
     x = 0
     y = 0
     radius = 15
 
-    def __init__(self, id, x, y):
+    def __init__(self, canvas, id, x, y):
+        self.canvas = canvas
         self.canvasID = id
 
         self.x = x
         self.y = y
 
-    def animate(self, root, canvas):
+    def toggleSuper(self):
+        self.super != self.super
 
-        root.bind("<KeyPress-Left>", lambda _: canvas.move(self.canvasID, -5, 0))
-        root.bind("<KeyPress-Right>", lambda _: canvas.move(self.canvasID, 5, 0))
-        root.bind("<KeyPress-Up>", lambda _: canvas.move(self.canvasID, 0, -5))
-        root.bind("<KeyPress-Down>", lambda _: canvas.move(self.canvasID, 0, 5))
+    def move(self, speedX, speedY):
+        self.speedX = speedX
+        self.speedY = speedY
+
+        self.canvas.move(self.canvasID, speedX, speedY)
+
+    def tick(self, root):
+        x1, y1, x2, y2 = self.canvas.coords(self.canvasID)
+
+        #self.lastX = self.x
+        #self.lastY = self.y
+
+        self.x = (x1 + x2) / 2
+        self.y = (y1 + y2) / 2
+
+        #self.speedX = self.lastX - self.x
+        #self.speedY = self.lastY - self.y
+
+        root.after(20, lambda: self.tick(root))
+
+
+    def animate(self, root):
+
+        #root.bind("<KeyPress-Left>", lambda _: canvas.move(self.canvasID, -5, 0))
+        #root.bind("<KeyPress-Right>", lambda _: canvas.move(self.canvasID, 5, 0))
+        #root.bind("<KeyPress-Up>", lambda _: canvas.move(self.canvasID, 0, -5))
+        #root.bind("<KeyPress-Down>", lambda _: canvas.move(self.canvasID, 0, 5))
+
+        root.bind("<KeyPress-Left>", lambda _: self.move(-5, 0))
+        root.bind("<KeyPress-Right>", lambda _: self.move(5, 0))
+        root.bind("<KeyPress-Up>", lambda _: self.move(0, -5))
+        root.bind("<KeyPress-Down>", lambda _: self.move(0, 5))
 
     def kill(self):
         print("Player has been killed")
+        print("Pallets collected: " + str(self.palletsCollected))
+        #print("Ghosts eaten: " + self.points)
         exit(0)
-        pass
 
-    def intersect(self):
-        pass
+    def intersect(self, root, grid, unitSize):
+        gridX = int(self.x / unitSize)
+        gridY = int(self.y / unitSize)
+
+        for x in range(-1, 2):
+            for y in range(-1, 2):
+                # Can cause index out of range error if player clips through outer walls
+                unit = grid[gridX + x][gridY + y]
+
+                if unit.content == 'PALLET':
+                    unitX = unit.center[0]
+                    unitY = unit.center[1]
+
+                    dx = abs(unitX - self.x)
+                    dy = abs(unitY - self.y)
+
+                    d = math.sqrt(dx**2 + dy**2)
+
+                    if d <= (self.radius + 10):
+                        print('Intersect pallet')
+                        self.palletsCollected += 1
+                        unit.setContent('EMPTY')
+                elif unit.content == 'WALL':
+                    # Sadly, this cheese doesn't work with the corners
+                    unitX = unit.center[0]
+                    unitY = unit.center[1]
+
+                    dx = abs(unitX - self.x)
+                    dy = abs(unitY - self.y)
+
+                    d = math.sqrt(dx ** 2 + dy ** 2)
+
+                    if d < (self.radius + 25):
+                        #print(str(self.speedX) + " : " + str(self.speedY))
+                        self.canvas.move(self.canvasID, -self.speedX * 2, -self.speedY * 2)
+                        #print('Intersect wall')
+                elif unit.content == 'SUPER':
+                    unitX = unit.center[0]
+                    unitY = unit.center[1]
+
+                    dx = abs(unitX - self.x)
+                    dy = abs(unitY - self.y)
+
+                    d = math.sqrt(dx ** 2 + dy ** 2)
+
+                    if d <= (self.radius + 25):
+                        self.toggleSuper()
+                        root.after(400, lambda: self.toggleSuper())
+                elif unit.content == 'EMPTY':
+                    pass
+                else:
+                    print('Invalid Content')
+                    exit(-1)
+
+        root.after(40, lambda: self.intersect(root, grid, unitSize))
