@@ -4,6 +4,7 @@ import math
 class Player:
     canvasID = None
     canvas = None
+    root = None
     palletsCollected = 0
     points = 0
     super = False
@@ -15,15 +16,16 @@ class Player:
     y = 0
     radius = 15
 
-    def __init__(self, canvas, id, x, y):
+    def __init__(self, root, canvas, id, x, y):
         self.canvas = canvas
         self.canvasID = id
+        self.root = root
 
         self.x = x
         self.y = y
 
     def toggleSuper(self):
-        self.super != self.super
+        self.super = not self.super
 
     def move(self, speedX, speedY):
         self.speedX = speedX
@@ -31,7 +33,7 @@ class Player:
 
         self.canvas.move(self.canvasID, speedX, speedY)
 
-    def tick(self, root):
+    def tick(self):
         x1, y1, x2, y2 = self.canvas.coords(self.canvasID)
 
         #self.lastX = self.x
@@ -43,20 +45,13 @@ class Player:
         #self.speedX = self.lastX - self.x
         #self.speedY = self.lastY - self.y
 
-        root.after(20, lambda: self.tick(root))
+        self.root.after(20, lambda: self.tick())
 
-
-    def animate(self, root):
-
-        #root.bind("<KeyPress-Left>", lambda _: canvas.move(self.canvasID, -5, 0))
-        #root.bind("<KeyPress-Right>", lambda _: canvas.move(self.canvasID, 5, 0))
-        #root.bind("<KeyPress-Up>", lambda _: canvas.move(self.canvasID, 0, -5))
-        #root.bind("<KeyPress-Down>", lambda _: canvas.move(self.canvasID, 0, 5))
-
-        root.bind("<KeyPress-Left>", lambda _: self.move(-5, 0))
-        root.bind("<KeyPress-Right>", lambda _: self.move(5, 0))
-        root.bind("<KeyPress-Up>", lambda _: self.move(0, -5))
-        root.bind("<KeyPress-Down>", lambda _: self.move(0, 5))
+    def animate(self):
+        self.root.bind("<KeyPress-Left>", lambda _: self.move(-5, 0))
+        self.root.bind("<KeyPress-Right>", lambda _: self.move(5, 0))
+        self.root.bind("<KeyPress-Up>", lambda _: self.move(0, -5))
+        self.root.bind("<KeyPress-Down>", lambda _: self.move(0, 5))
 
     def kill(self):
         print("Player has been killed")
@@ -64,7 +59,7 @@ class Player:
         #print("Ghosts eaten: " + self.points)
         exit(0)
 
-    def intersect(self, root, grid, unitSize):
+    def intersect(self, grid, unitSize):
         gridX = int(self.x / unitSize)
         gridY = int(self.y / unitSize)
 
@@ -83,9 +78,9 @@ class Player:
                     d = math.sqrt(dx**2 + dy**2)
 
                     if d <= (self.radius + 10):
-                        print('Intersect pallet')
+                        #print('Intersect pallet')
                         self.palletsCollected += 1
-                        unit.setContent('EMPTY')
+                        unit.setContent(self.canvas, 'EMPTY')
                 elif unit.content == 'WALL':
                     # Sadly, this cheese doesn't work with the corners
                     unitX = unit.center[0]
@@ -110,12 +105,15 @@ class Player:
                     d = math.sqrt(dx ** 2 + dy ** 2)
 
                     if d <= (self.radius + 25):
+                        #pass
                         self.toggleSuper()
-                        root.after(400, lambda: self.toggleSuper())
+                        if unit.content != 'EMPTY':
+                            unit.setContent(self.canvas, 'EMPTY')
+                        self.root.after(6000, lambda: self.toggleSuper())
                 elif unit.content == 'EMPTY':
                     pass
                 else:
                     print('Invalid Content')
                     exit(-1)
 
-        root.after(40, lambda: self.intersect(root, grid, unitSize))
+        self.root.after(40, lambda: self.intersect(grid, unitSize))

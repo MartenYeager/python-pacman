@@ -18,9 +18,9 @@ class gridUnit:
         #self.gridY = int(gridY)
         self.center = (gridX * size + size / 2, gridY * size + size / 2)
 
-    def setContent(self, content):  #Used to update grids with eaten pallets
+    def setContent(self, canvas, content):  #Used to update grids with eaten pallets
         self.content = content
-        #canvas
+        canvas.delete(self.canvasID)
 
     def setCanvasID(self, ID):
         self.canvasID = ID;
@@ -51,6 +51,14 @@ def meetsEmptyCondition(x, y):
     )
     return emptyCondition
 
+def meetsSuperCondition(x, y):
+    superCondition = (
+        (x == 1 and y == 1) or
+        (x == 1 and y == 9) or
+        (x == 9 and y == 1) or
+        (x == 9 and y == 9)
+    )
+    return superCondition
 
 def innitGrid(gridSize, unitSize):
     grid = numpy.ndarray(shape=(gridSize[0], gridSize[1]), dtype=gridUnit)
@@ -63,7 +71,7 @@ def innitGrid(gridSize, unitSize):
                 content = 'WALL'
             elif meetsEmptyCondition(gridX, gridY):
                 content = 'EMPTY'
-            elif False:
+            elif meetsSuperCondition(gridX, gridY):
                 content = 'SUPER'
             else:
                 content = 'PALLET'
@@ -81,10 +89,20 @@ def drawGrid(grid, canvas):
         for gridY in range(len(grid)):
             unit = grid[gridX][gridY]
             if unit.content == 'WALL':
-                #id = canvas.create_rectangle(gridX * unitSize, gridY * unitSize, (gridX + 1) * unitSize, (gridY + 1) * unitSize, fill='blue')
-                id = canvas.create_rectangle(unit.center[0] - unitSize / 2, unit.center[1] - unitSize / 2, unit.center[0] + unitSize / 2, unit.center[1] + unitSize / 2, fill='blue')
+                id = canvas.create_rectangle(unit.center[0] - unitSize / 2,
+                                             unit.center[1] - unitSize / 2,
+                                             unit.center[0] + unitSize / 2,
+                                             unit.center[1] + unitSize / 2, fill='blue')
             elif unit.content == 'PALLET':
-                id = canvas.create_oval(unit.center[0] - unitSize / 2 + sizeModifier, unit.center[1] - unitSize / 2 + sizeModifier, unit.center[0] + unitSize / 2 - sizeModifier, unit.center[1] + unitSize / 2 - sizeModifier, fill='beige')
+                id = canvas.create_oval(unit.center[0] - unitSize / 2 + sizeModifier,
+                                        unit.center[1] - unitSize / 2 + sizeModifier,
+                                        unit.center[0] + unitSize / 2 - sizeModifier,
+                                        unit.center[1] + unitSize / 2 - sizeModifier, fill='beige')
+            elif unit.content == 'SUPER':
+                id = canvas.create_oval(unit.center[0] - unitSize / 2,
+                                        unit.center[1] - unitSize / 2,
+                                        unit.center[0] + unitSize / 2,
+                                        unit.center[1] + unitSize / 2, fill='beige')
             unit.setCanvasID(id)
 
 
@@ -102,7 +120,7 @@ def innitWindow():
 
     grid = innitGrid(gridSize, unitSize)
 
-    canvasBackground = tk.Canvas(root, width=550, height=550, background='white')
+    canvasBackground = tk.Canvas(root, width=550, height=550, background='black')
     drawGrid(grid, canvasBackground)
 
     spawn = grid[1][5].center
@@ -112,32 +130,45 @@ def innitWindow():
     offset = unitSize / 2
 
     #temp = canvasBackground.create_oval(spawn[0] - offset + sizeModifier, spawn[1] - offset + sizeModifier, spawn[0] + offset - sizeModifier, spawn[1] + offset - sizeModifier, fill='gold')
-    playerID = canvasBackground.create_oval(spawn[0] - offset + playerSizeModifier, spawn[1] - offset + playerSizeModifier,
-                                        spawn[0] + offset - playerSizeModifier, spawn[1] + offset - playerSizeModifier, fill='gold')
-    player = pl.Player(canvasBackground, playerID, spawn[0], spawn[1])
+    playerID = canvasBackground.create_oval(spawn[0] - offset + playerSizeModifier,
+                                            spawn[1] - offset + playerSizeModifier,
+                                            spawn[0] + offset - playerSizeModifier,
+                                            spawn[1] + offset - playerSizeModifier, fill='gold')
+    player = pl.Player(root, canvasBackground, playerID, spawn[0], spawn[1])
     #temp1 = canvasBackground.create_oval(spawn1[0] - offset + sizeModifier, spawn1[1] - offset + sizeModifier, spawn1[0] + offset - sizeModifier, spawn1[1] + offset - sizeModifier, fill='red')
-    ghost1 = gh.Ghost(canvasBackground, canvasBackground.create_oval(spawn1[0] - offset + 0, spawn1[1] - offset + 0,
-                                        spawn1[0] + offset - 0, spawn1[1] + offset - 0,
-                                        fill='red'), 1, spawn1[0], spawn1[1])
+    ghost1 = gh.Ghost(root, canvasBackground, canvasBackground.create_oval(spawn1[0] - offset + 0,
+                                                                        spawn1[1] - offset + 0,
+                                                                        spawn1[0] + offset - 0,
+                                                                        spawn1[1] + offset - 0,
+                                                                        fill='red'), 1, -5, 0, spawn1[0], spawn1[1])
+    #print(str(ghost1.canvasID) + ' = ' + str(ghost1.x) + " : " + str(ghost1.y))
     #temp2 = canvasBackground.create_oval(spawn2[0] - offset + sizeModifier, spawn2[1] - offset + sizeModifier, spawn2[0] + offset - sizeModifier, spawn2[1] + offset - sizeModifier, fill='red')
-    ghost2 = gh.Ghost(canvasBackground, canvasBackground.create_oval(spawn2[0] - offset + 0, spawn2[1] - offset + 0,
-                                         spawn2[0] + offset - 0, spawn2[1] + offset - 0,
-                                         fill='red'), 2, spawn1[0], spawn1[1])
+    ghost2 = gh.Ghost(root, canvasBackground, canvasBackground.create_oval(spawn2[0] - offset + 0,
+                                                                        spawn2[1] - offset + 0,
+                                                                        spawn2[0] + offset - 0,
+                                                                        spawn2[1] + offset - 0,
+                                                                        fill='red'), 2, -5, 0, spawn2[0], spawn2[1])
+    #print(str(ghost2.canvasID) + ' = ' + str(ghost2.x) + " : " + str(ghost2.y))
     #temp3 = canvasBackground.create_oval(spawn3[0] - offset + sizeModifier, spawn3[1] - offset + sizeModifier, spawn3[0] + offset - sizeModifier, spawn3[1] + offset - sizeModifier, fill='red')
-    temp3 = canvasBackground.create_oval(spawn3[0] - offset + 0, spawn3[1] - offset + 0,
-                                         spawn3[0] + offset - 0, spawn3[1] + offset - 0,
-                                         fill='red')
+    ghost3 = gh.Ghost(root, canvasBackground, canvasBackground.create_oval(spawn3[0] - offset + 0,
+                                                                           spawn3[1] - offset + 0,
+                                                                           spawn3[0] + offset - 0,
+                                                                           spawn3[1] + offset - 0,
+                                                                           fill='red'), 3, 0, -5, spawn3[0], spawn3[1])
     canvasBackground.pack()
 
-    #ghost1.animate(root, canvasBackground)
-    ghost1.intersectPlayer(root, player)
+    ghost1.animate()
+    ghost1.intersectPlayer(player)
 
-    #ghost2.animate(root, canvasBackground)
-    ghost2.intersectPlayer(root, player)
+    ghost2.animate()
+    ghost2.intersectPlayer(player)
 
-    player.animate(root)
-    player.tick(root)
-    player.intersect(root, grid, unitSize)
+    ghost3.animate()
+    ghost3.intersectPlayer(player)
+
+    player.animate()
+    player.tick()
+    player.intersect(grid, unitSize)
 
     root.mainloop()
 
