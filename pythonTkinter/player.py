@@ -36,14 +36,8 @@ class Player:
     def tick(self):
         x1, y1, x2, y2 = self.canvas.coords(self.canvasID)
 
-        #self.lastX = self.x
-        #self.lastY = self.y
-
         self.x = (x1 + x2) / 2
         self.y = (y1 + y2) / 2
-
-        #self.speedX = self.lastX - self.x
-        #self.speedY = self.lastY - self.y
 
         self.root.after(20, lambda: self.tick())
 
@@ -56,7 +50,6 @@ class Player:
     def kill(self):
         print("Player has been killed")
         print("Pallets collected: " + str(self.palletsCollected))
-        #print("Ghosts eaten: " + self.points)
         exit(0)
 
     def intersect(self, grid, unitSize):
@@ -67,49 +60,41 @@ class Player:
             for y in range(-1, 2):
                 # Can cause index out of range error if player clips through outer walls
                 unit = grid[gridX + x][gridY + y]
+                unitX = unit.center[0]
+                unitY = unit.center[1]
 
                 if unit.content == 'PALLET':
-                    unitX = unit.center[0]
-                    unitY = unit.center[1]
-
                     dx = abs(unitX - self.x)
                     dy = abs(unitY - self.y)
 
                     d = math.sqrt(dx**2 + dy**2)
 
                     if d <= (self.radius + 10):
-                        #print('Intersect pallet')
                         self.palletsCollected += 1
                         unit.setContent(self.canvas, 'EMPTY')
+
                 elif unit.content == 'WALL':
                     # Sadly, this cheese doesn't work with the corners
-                    unitX = unit.center[0]
-                    unitY = unit.center[1]
-
                     dx = abs(unitX - self.x)
                     dy = abs(unitY - self.y)
 
                     d = math.sqrt(dx ** 2 + dy ** 2)
 
                     if d < (self.radius + 25):
-                        #print(str(self.speedX) + " : " + str(self.speedY))
                         self.canvas.move(self.canvasID, -self.speedX * 2, -self.speedY * 2)
-                        #print('Intersect wall')
-                elif unit.content == 'SUPER':
-                    unitX = unit.center[0]
-                    unitY = unit.center[1]
 
+                elif unit.content == 'SUPER':
                     dx = abs(unitX - self.x)
                     dy = abs(unitY - self.y)
 
                     d = math.sqrt(dx ** 2 + dy ** 2)
 
                     if d <= (self.radius + 25):
-                        #pass
                         self.toggleSuper()
                         if unit.content != 'EMPTY':
                             unit.setContent(self.canvas, 'EMPTY')
                         self.root.after(6000, lambda: self.toggleSuper())
+
                 elif unit.content == 'EMPTY':
                     pass
                 else:

@@ -1,69 +1,88 @@
 import math
 
 
-def route1(ghost, xTL, yTL, xBR, yBR):
-    if xTL <= 50 and yTL == 50:
+def route1(ghost):
+    x = ghost.x
+    y = ghost.y
+    # print(str(x) + ' : ' + str(y))
+    if x == 75 and y == 75:
         ghost.speedX = 0
         ghost.speedY = 5
 
-    elif yBR >= 500 and xBR == 100:
+    elif x == 75 and y == 475:
         ghost.speedX = 5
         ghost.speedY = 0
 
-    elif xBR >= 500 and yBR == 500:
+    elif x == 475 and y == 475:
         ghost.speedX = 0
         ghost.speedY = -5
 
-    elif yTL <= 50 and xTL == 450:
+    elif x == 475 and y == 75:
         ghost.speedX = -5
         ghost.speedY = 0
 
 
-def route2(ghost, xTL, yTL, xBR, yBR):
-    if xTL <= 50 and yBR == 500:
+def route2(ghost):
+    x = ghost.x
+    y = ghost.y
+    # print(str(x) + ' : ' + str(y))
+    if x == 75 and y == 475:
         ghost.speedX = 0
         ghost.speedY = -5
 
-    elif xBR == 100 and yBR  <= 100:
+    elif x == 75 and y == 75:
         ghost.speedX = 5
         ghost.speedY = 0
 
-    elif xBR >= 500 and yBR == 100:
+    elif x == 475 and y == 75:
         ghost.speedX = 0
         ghost.speedY = 5
 
-    elif xBR <= 500 and yBR == 500:
+    elif x == 475 and y == 475:
         ghost.speedX = -5
         ghost.speedY = 0
 
 
-def route3(ghost, xTL, yTL, xBR, yBR):
+def route3(ghost):
     x = ghost.x
     y = ghost.y
     #print(str(x) + ' : ' + str(y))
     if x == 375 and y == 175:
         ghost.speedX = -5
         ghost.speedY = 0
-        #print('Ping1')
-        #print(str(ghost.x) + ' : ' + str(ghost.y))
 
-    elif x == 180 and y == 170:
+    elif x == 175 and y == 175:
         ghost.speedX = 0
         ghost.speedY = 5
-        #print('Ping2')
-        #print(str(ghost.x) + ' : ' + str(ghost.y))
 
-    elif x == 175 and y == 370:
+    elif x == 175 and y == 375:
         ghost.speedX = 5
         ghost.speedY = 0
-        #print('Ping3')
-        #print(str(ghost.x) + ' : ' + str(ghost.y))
 
-    elif x == 370 and y == 375:
+    elif x == 375 and y == 375:
         ghost.speedX = 0
         ghost.speedY = -5
-        #print('Ping4')
-        #print(str(ghost.x) + ' : ' + str(ghost.y))
+
+
+def route4(ghost):
+    x = ghost.x
+    y = ghost.y
+    # print(str(x) + ' : ' + str(y))
+    if x == 375 and y == 375:
+        ghost.speedX = -5
+        ghost.speedY = 0
+
+    elif x == 175 and y == 375:
+        ghost.speedX = 0
+        ghost.speedY = -5
+
+    elif x == 175 and y == 175:
+        ghost.speedX = 5
+        ghost.speedY = 0
+
+    elif x == 375 and y == 175:
+        ghost.speedX = 0
+        ghost.speedY = 5
 
 
 class Ghost:
@@ -101,27 +120,27 @@ class Ghost:
         self.x = x
         self.y = y
 
-        #self.intersectPlayer()
-
     def animate(self):
-        if not self.killed:
-            self.canvas.move(self.canvasID, self.speedX, self.speedY)
-
         xTL, yTL, xBR, yBR = self.canvas.coords(self.canvasID)
+        self.x = (xTL + xBR) / 2
+        self.y = (yTL + yBR) / 2
+
         if not self.killed:
             # Route
             if self.route == 1:
-                route1(self, xTL, yTL, xBR, yBR)
+                route1(self)
             elif self.route == 2:
-                route2(self, xTL, yTL, xBR, yBR)
+                route2(self)
             elif self.route == 3:
-                route3(self, xTL, yTL, xBR, yBR)
+                route3(self)
+            elif self.route == 4:
+                route4(self)
             else:
                 print('Invalid route')
                 exit(-1)
 
-        self.x = (xTL + xBR) / 2
-        self.y = (yTL + yBR) / 2
+        if not self.killed:
+            self.canvas.move(self.canvasID, self.speedX, self.speedY)
 
         self.root.after(40, lambda: self.animate())
 
