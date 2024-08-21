@@ -166,6 +166,7 @@ class Ghost:
         if d <= (self.radius + player.radius):
             if player.super:
                 self.kill()
+                player.ghostEaten += 1
             else:
                 player.kill()
         self.root.after(40, lambda: self.intersectPlayer(player))

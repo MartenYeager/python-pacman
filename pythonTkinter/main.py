@@ -4,22 +4,25 @@ import player as pl
 import tkinter as tk
 
 
-def innitWindow():
-    root = tk.Tk()
-    screenWidth = 550
-    screenHeight = 550
-    screenDimensions = str(screenWidth) + 'x' + str(screenHeight)
-    root.geometry(screenDimensions)
+def innitMainScreen(root):
+    #innitGameScreen(root)
+    pass
 
+
+def innitGameScreen(root):
     playerSizeModifier = 10
 
     unitSize = 50
-    gridSize = (int(screenWidth / unitSize), int(screenHeight / unitSize))
+    gridSize = (int(550 / unitSize), int(550 / unitSize))
 
+    # Creates the grid of the maze
     grid = gr.innitGrid(gridSize, unitSize)
 
+    # Creates the canvas upon which the maze is drawn
     canvasBackground = tk.Canvas(root, width=550, height=550, background='black')
+
     gr.drawGrid(grid, canvasBackground)
+    canvasBackground.place(relx=0, rely=0)
 
     spawn = grid[1][5].center
     spawn1 = grid[9][1].center
@@ -27,12 +30,25 @@ def innitWindow():
     spawn3 = grid[7][5].center
     offset = unitSize / 2
 
+    # Creates the player obj
     playerID = canvasBackground.create_oval(spawn[0] - offset + playerSizeModifier,
                                             spawn[1] - offset + playerSizeModifier,
                                             spawn[0] + offset - playerSizeModifier,
                                             spawn[1] + offset - playerSizeModifier, fill='gold')
     player = pl.Player(root, canvasBackground, playerID, spawn[0], spawn[1])
 
+    # Adds UI Labels
+    labelPallets = tk.Label(root, textvariable=player.labelPallets)
+    #labelPallets.place(relx=0.8, rely=0)
+    labelPallets.pack(anchor='ne')
+    labelGhost = tk.Label(root, textvariable=player.labelGhost)
+    #labelGhost.place(relx=0.8, rely=0)
+    labelGhost.pack(anchor='ne')
+    labelSuper = tk.Label(root, textvariable=player.labelSuper)
+    #labelSuper.place(relx=0.8, rely=0)
+    labelSuper.pack(anchor='ne')
+
+    # Creates the ghost characters
     ghost1 = gh.Ghost(root, canvasBackground, canvasBackground.create_oval(spawn1[0] - offset + 0,
                                                                            spawn1[1] - offset + 0,
                                                                            spawn1[0] + offset - 0,
@@ -57,8 +73,7 @@ def innitWindow():
                                                                            spawn3[1] + offset - 0,
                                                                            fill='red'), 4, 0, 5, spawn3[0], spawn3[1])
 
-    canvasBackground.pack()
-
+    # Starts the logic of the characters and player
     ghost1.animate()
     ghost1.intersectPlayer(player)
 
@@ -75,11 +90,19 @@ def innitWindow():
     player.tick()
     player.intersect(grid, unitSize)
 
-    root.mainloop()
-
 
 def main():
-    innitWindow()
+    root = tk.Tk()
+    screenWidth = 650
+    screenHeight = 550
+    screenDimensions = str(screenWidth) + 'x' + str(screenHeight)
+    root.geometry(screenDimensions)
+
+    #root.after(5000, lambda: innitGameScreen(root))
+    innitGameScreen(root)
+    innitMainScreen(root)
+
+    root.mainloop()
 
 
 if "__main__":

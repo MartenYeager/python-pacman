@@ -1,13 +1,18 @@
 import math
+import tkinter as tk
 
 
 class Player:
     canvasID = None
     canvas = None
     root = None
+
     palletsCollected = 0
-    points = 0
+    labelPallets = None
+    ghostEaten = 0
+    labelGhost = None
     super = False
+    labelSuper = None
 
     speedX = 0
     speedY = 0
@@ -20,6 +25,10 @@ class Player:
         self.canvas = canvas
         self.canvasID = id
         self.root = root
+
+        self.labelPallets = tk.StringVar()
+        self.labelGhost = tk.StringVar()
+        self.labelSuper = tk.StringVar()
 
         self.x = x
         self.y = y
@@ -38,6 +47,10 @@ class Player:
 
         self.x = (x1 + x2) / 2
         self.y = (y1 + y2) / 2
+
+        self.labelPallets.set('Pallets: ' + str(self.palletsCollected))
+        self.labelGhost.set('Ghosts: ' + str(self.ghostEaten))
+        self.labelSuper.set('Super: ' + str(self.super))
 
         self.root.after(20, lambda: self.tick())
 
@@ -74,7 +87,7 @@ class Player:
                         unit.setContent(self.canvas, 'EMPTY')
 
                 elif unit.content == 'WALL':
-                    # Sadly, this cheese doesn't work with the corners
+                    # TODO: Sadly, this cheese doesn't work with the corners
                     dx = abs(unitX - self.x)
                     dy = abs(unitY - self.y)
 
@@ -90,6 +103,8 @@ class Player:
                     d = math.sqrt(dx ** 2 + dy ** 2)
 
                     if d <= (self.radius + 25):
+                        self.palletsCollected += 1
+                        # TODO: the toggling is wonky
                         self.toggleSuper()
                         if unit.content != 'EMPTY':
                             unit.setContent(self.canvas, 'EMPTY')
