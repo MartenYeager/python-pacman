@@ -42,6 +42,7 @@ class Player:
 
         self.canvas.move(self.canvasID, speedX, speedY)
 
+    # Will cause an error if the screen gets changed
     def tick(self):
         x1, y1, x2, y2 = self.canvas.coords(self.canvasID)
 
@@ -61,6 +62,7 @@ class Player:
         self.root.bind("<KeyPress-Down>", lambda _: self.move(0, 5))
 
     def kill(self):
+        # TODO: call innitEndScreen
         print("Player has been killed")
         print("Pallets collected: " + str(self.palletsCollected))
         exit(0)

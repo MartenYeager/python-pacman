@@ -120,6 +120,7 @@ class Ghost:
         self.x = x
         self.y = y
 
+    # Will cause errors if the screen gets changed (one per ghost)
     def animate(self):
         xTL, yTL, xBR, yBR = self.canvas.coords(self.canvasID)
         self.x = (xTL + xBR) / 2

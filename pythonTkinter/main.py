@@ -4,12 +4,41 @@ import player as pl
 import tkinter as tk
 
 
-def innitMainScreen(root):
-    #innitGameScreen(root)
+def clearScreen(root):
+    # TODO: Clear the root
+    obj = root.winfo_children();
+
+    for widget in root.winfo_children():
+        widget.destroy()
     pass
 
 
+def innitMainScreen(root):
+    clearScreen(root)
+
+    button = tk.Button(root, text="Game Start", command=lambda: innitGameScreen(root))
+    button.pack(anchor='e')
+
+
+def innitEndScreen(root, labelPallets, labelGhost):
+    clearScreen(root)
+
+    labelPallets = tk.Label(root, textvariable=labelPallets)
+    labelPallets.pack()
+    labelGhost = tk.Label(root, textvariable=labelGhost)
+    labelGhost.pack()
+
+    button1 = tk.Button(root, text="Game Restart", command=lambda: innitGameScreen(root))
+    button1.pack(anchor='e')
+
+    button2 = tk.Button(root, text="Main Screen", command=lambda: innitMainScreen(root))
+    button2.pack(anchor='e')
+    #exit(0)
+
+
 def innitGameScreen(root):
+    clearScreen(root)
+
     playerSizeModifier = 10
 
     unitSize = 50
@@ -37,7 +66,7 @@ def innitGameScreen(root):
                                             spawn[1] + offset - playerSizeModifier, fill='gold')
     player = pl.Player(root, canvasBackground, playerID, spawn[0], spawn[1])
 
-    # Adds UI Labels
+    # Adds Player UI Labels
     labelPallets = tk.Label(root, textvariable=player.labelPallets)
     #labelPallets.place(relx=0.8, rely=0)
     labelPallets.pack(anchor='ne')
@@ -75,10 +104,10 @@ def innitGameScreen(root):
 
     # Starts the logic of the characters and player
     ghost1.animate()
-    ghost1.intersectPlayer(player)
+    #ghost1.intersectPlayer(player)
 
     ghost2.animate()
-    ghost2.intersectPlayer(player)
+    #ghost2.intersectPlayer(player)
 
     ghost3.animate()
     ghost3.intersectPlayer(player)
@@ -90,6 +119,17 @@ def innitGameScreen(root):
     player.tick()
     player.intersect(grid, unitSize)
 
+    button1 = tk.Button(root, text="Game Restart", command=lambda: innitGameScreen(root))
+    button1.pack(anchor='e')
+
+    button2 = tk.Button(root, text="Main Screen", command=lambda: innitMainScreen(root))
+    button2.pack(anchor='e')
+
+    button3 = tk.Button(root, text="Game End", command=lambda: innitEndScreen(root, player.labelPallets, player.labelGhost))
+    button3.pack(anchor='e')
+
+
+
 
 def main():
     root = tk.Tk()
@@ -99,7 +139,7 @@ def main():
     root.geometry(screenDimensions)
 
     #root.after(5000, lambda: innitGameScreen(root))
-    innitGameScreen(root)
+    #innitGameScreen(root)
     innitMainScreen(root)
 
     root.mainloop()
