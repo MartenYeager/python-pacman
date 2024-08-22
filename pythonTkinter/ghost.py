@@ -89,6 +89,7 @@ class Ghost:
     canvasID = None
     canvas = None
     root = None
+    killSwitch = False
 
     route = None
     killed = False
@@ -143,7 +144,8 @@ class Ghost:
         if not self.killed:
             self.canvas.move(self.canvasID, self.speedX, self.speedY)
 
-        self.root.after(40, lambda: self.animate())
+        if not self.killSwitch:
+            self.root.after(40, lambda: self.animate())
 
     def kill(self):
         if not self.killed:
@@ -170,4 +172,8 @@ class Ghost:
                 player.ghostEaten += 1
             else:
                 player.kill()
-        self.root.after(40, lambda: self.intersectPlayer(player))
+                if player.killSwitch:
+                    self.killSwitch = True
+
+        if not self.killSwitch:
+            self.root.after(40, lambda: self.intersectPlayer(player))

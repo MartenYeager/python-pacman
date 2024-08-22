@@ -1,4 +1,5 @@
 import math
+import screens as sc
 import tkinter as tk
 
 
@@ -6,7 +7,10 @@ class Player:
     canvasID = None
     canvas = None
     root = None
+    killSwitch = False
 
+    lives = 3
+    labelLives = None
     palletsCollected = 0
     labelPallets = None
     ghostEaten = 0
@@ -14,24 +18,29 @@ class Player:
     super = False
     labelSuper = None
 
+    x = 0
+    spawnX = 0
+    y = 0
+    spawnY = 0
+    radius = 15
+
     speedX = 0
     speedY = 0
-
-    x = 0
-    y = 0
-    radius = 15
 
     def __init__(self, root, canvas, id, x, y):
         self.canvas = canvas
         self.canvasID = id
         self.root = root
 
+        self.labelLives = tk.StringVar()
         self.labelPallets = tk.StringVar()
         self.labelGhost = tk.StringVar()
         self.labelSuper = tk.StringVar()
 
         self.x = x
+        self.spawnX = x
         self.y = y
+        self.spawnY = y
 
     def toggleSuper(self):
         self.super = not self.super
@@ -40,7 +49,8 @@ class Player:
         self.speedX = speedX
         self.speedY = speedY
 
-        self.canvas.move(self.canvasID, speedX, speedY)
+        if not self.killSwitch:
+            self.canvas.move(self.canvasID, speedX, speedY)
 
     # Will cause an error if the screen gets changed
     def tick(self):
@@ -49,11 +59,13 @@ class Player:
         self.x = (x1 + x2) / 2
         self.y = (y1 + y2) / 2
 
+        self.labelLives.set('Lives: ' + str(self.lives))
         self.labelPallets.set('Pallets: ' + str(self.palletsCollected))
         self.labelGhost.set('Ghosts: ' + str(self.ghostEaten))
         self.labelSuper.set('Super: ' + str(self.super))
 
-        self.root.after(20, lambda: self.tick())
+        if not self.killSwitch:
+            self.root.after(20, lambda: self.tick())
 
     def animate(self):
         self.root.bind("<KeyPress-Left>", lambda _: self.move(-5, 0))
@@ -62,10 +74,18 @@ class Player:
         self.root.bind("<KeyPress-Down>", lambda _: self.move(0, 5))
 
     def kill(self):
-        # TODO: call innitEndScreen
-        print("Player has been killed")
-        print("Pallets collected: " + str(self.palletsCollected))
-        exit(0)
+        if self.lives <= 1:
+            self.killSwitch = True
+
+            sc.innitEndScreen(self.root, self.labelPallets, self.labelGhost)
+        else:
+            # Can cause spawn camping
+            self.lives -= 1
+            self.canvas.coords(self.canvasID,
+                               self.spawnX - self.radius,
+                               self.spawnY - self.radius,
+                               self.spawnX + self.radius,
+                               self.spawnY + self.radius)
 
     def intersect(self, grid, unitSize):
         gridX = int(self.x / unitSize)
@@ -89,13 +109,15 @@ class Player:
                         unit.setContent(self.canvas, 'EMPTY')
 
                 elif unit.content == 'WALL':
-                    # TODO: Sadly, this cheese doesn't work with the corners
-                    dx = abs(unitX - self.x)
-                    dy = abs(unitY - self.y)
+                    Xn = max(unitX - 25, min(self.x, unitX + 25))
+                    Yn = max(unitY - 25, min(self.y, unitY + 25))
 
-                    d = math.sqrt(dx ** 2 + dy ** 2)
+                    # Calculate the distance between the nearest point and the center of the circle
+                    Dx = Xn - self.x
+                    Dy = Yn - self.y
 
-                    if d < (self.radius + 25):
+                    # Return True if the distance is less than or equal to the radius squared
+                    if (Dx * Dx + Dy * Dy) <= self.radius**2:
                         self.canvas.move(self.canvasID, -self.speedX * 2, -self.speedY * 2)
 
                 elif unit.content == 'SUPER':
@@ -105,12 +127,12 @@ class Player:
                     d = math.sqrt(dx ** 2 + dy ** 2)
 
                     if d <= (self.radius + 25):
-                        self.palletsCollected += 1
-                        # TODO: the toggling is wonky
-                        self.toggleSuper()
-                        if unit.content != 'EMPTY':
-                            unit.setContent(self.canvas, 'EMPTY')
-                        self.root.after(6000, lambda: self.toggleSuper())
+                        if not self.super:
+                            self.palletsCollected += 1
+                            self.toggleSuper()
+                            if unit.content != 'EMPTY':
+                                unit.setContent(self.canvas, 'EMPTY')
+                            self.root.after(6000, lambda: self.toggleSuper())
 
                 elif unit.content == 'EMPTY':
                     pass
