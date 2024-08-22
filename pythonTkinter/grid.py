@@ -1,5 +1,6 @@
 import numpy
 
+
 def meetsWallCondition(x, y):
     wallCondition = (
         (x == 2 and (y >= 6 and y <= 8)) or
@@ -27,6 +28,7 @@ def meetsEmptyCondition(x, y):
     )
     return emptyCondition
 
+
 def meetsSuperCondition(x, y):
     superCondition = (
         (x == 1 and y == 1) or
@@ -35,6 +37,7 @@ def meetsSuperCondition(x, y):
         (x == 9 and y == 9)
     )
     return superCondition
+
 
 def innitGrid(gridSize, unitSize):
     grid = numpy.ndarray(shape=(gridSize[0], gridSize[1]), dtype=GridUnit)

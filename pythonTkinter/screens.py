@@ -3,6 +3,7 @@ import ghost as gh
 import player as pl
 import tkinter as tk
 
+
 def clearScreen(root):
     for widget in root.winfo_children():
         widget.destroy()
@@ -11,9 +12,8 @@ def clearScreen(root):
 def innitMainScreen(root):
     clearScreen(root)
 
-    button = tk.Button(root, text="Game Start", command=lambda: innitGameScreen(root))
-    #button.pack(anchor='center')
-    button.place(relx=0.45, rely=0.45)
+    buttonGame = tk.Button(root, text="Game Start", command=lambda: innitGameScreen(root))
+    buttonGame.place(relx=0.45, rely=0.45)
 
 
 def innitEndScreen(root, labelPallets, labelGhost):
@@ -24,18 +24,17 @@ def innitEndScreen(root, labelPallets, labelGhost):
     labelGhost = tk.Label(root, textvariable=labelGhost)
     labelGhost.pack()
 
-    button1 = tk.Button(root, text="Game Restart", command=lambda: innitGameScreen(root))
-    button1.pack()
+    buttonRestart = tk.Button(root, text="Game Restart", command=lambda: innitGameScreen(root))
+    buttonRestart.pack()
 
-    button2 = tk.Button(root, text="Main Screen", command=lambda: innitMainScreen(root))
-    button2.pack()
+    buttonMain = tk.Button(root, text="Main Screen", command=lambda: innitMainScreen(root))
+    buttonMain.pack()
 
 
 def innitGameScreen(root):
     clearScreen(root)
 
     playerSizeModifier = 10
-
     unitSize = 50
     gridSize = (int(550 / unitSize), int(550 / unitSize))
 
@@ -59,21 +58,26 @@ def innitGameScreen(root):
                                             spawn[1] - offset + playerSizeModifier,
                                             spawn[0] + offset - playerSizeModifier,
                                             spawn[1] + offset - playerSizeModifier, fill='gold')
-    #temp = lambda: innitEndScreen(player.root, player.labelPallets, player.labelGhost)
     player = pl.Player(root, canvasBackground, playerID, spawn[0], spawn[1])
 
-    # Adds Player UI Labels
+    # Adds UI
     labelLives = tk.Label(root, textvariable=player.labelLives)
     labelLives.pack(anchor='ne')
     labelPallets = tk.Label(root, textvariable=player.labelPallets)
-    #labelPallets.place(relx=0.8, rely=0)
     labelPallets.pack(anchor='ne')
     labelGhost = tk.Label(root, textvariable=player.labelGhost)
-    #labelGhost.place(relx=0.8, rely=0)
     labelGhost.pack(anchor='ne')
     labelSuper = tk.Label(root, textvariable=player.labelSuper)
-    #labelSuper.place(relx=0.8, rely=0)
     labelSuper.pack(anchor='ne')
+
+    buttonRestart = tk.Button(root, text="Game Restart", command=lambda: innitGameScreen(root))
+    buttonRestart.pack(anchor='e')
+
+    buttonMain = tk.Button(root, text="Main Screen", command=lambda: innitMainScreen(root))
+    buttonMain.pack(anchor='e')
+
+    buttonEnd = tk.Button(root, text="Game End", command=lambda: innitEndScreen(root, player.labelPallets, player.labelGhost))
+    buttonEnd.pack(anchor='e')
 
     # Creates the ghost characters
     ghost1 = gh.Ghost(root, canvasBackground, canvasBackground.create_oval(spawn1[0] - offset + 0,
@@ -117,11 +121,3 @@ def innitGameScreen(root):
     player.tick()
     player.intersect(grid, unitSize)
 
-    button1 = tk.Button(root, text="Game Restart", command=lambda: innitGameScreen(root))
-    button1.pack(anchor='e')
-
-    button2 = tk.Button(root, text="Main Screen", command=lambda: innitMainScreen(root))
-    button2.pack(anchor='e')
-
-    button3 = tk.Button(root, text="Game End", command=lambda: innitEndScreen(root, player.labelPallets, player.labelGhost))
-    button3.pack(anchor='e')
